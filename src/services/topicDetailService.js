@@ -79,7 +79,7 @@ export const UPDATE_TOPIC_DETAIL = gql`
 `;
 
 export const DELETE_TOPIC_DETAIL = gql`
-  mutation RemoveDetailTopic($id: ID!) {
+  mutation RemoveDetailTopic($id: Int!) {
     removeDetailTopic(id: $id) {
       createdAt
       deletedAt
@@ -120,9 +120,6 @@ export const topicDetailService = {
   },
 
   getTopicDetailsByTopicId: async (topicId) => {
-
-
-   
     try {
       if (!topicId) {
         console.error('Invalid topicId provided:', topicId);
@@ -147,9 +144,24 @@ export const topicDetailService = {
 
   createTopicDetail: async (detailData) => {
     try {
+      // Create a copy of the data to avoid mutating the original
+      const processedData = { ...detailData };
+      
+      // Convert topicId to integer if it exists
+      if (processedData.topicId !== undefined) {
+        processedData.topicId = parseInt(processedData.topicId, 10);
+        
+        // Check if conversion was successful
+        if (isNaN(processedData.topicId)) {
+          throw new Error('Invalid topic ID provided - must be a valid integer');
+        }
+        
+        console.log("Sending createDetailTopic with topicId:", processedData.topicId, "Type:", typeof processedData.topicId);
+      }
+      
       const { data } = await apolloClient.mutate({
         mutation: CREATE_TOPIC_DETAIL,
-        variables: { createDetailTopicInput: detailData }
+        variables: { createDetailTopicInput: processedData }
       });
       return data.createDetailTopic;
     } catch (error) {
@@ -160,9 +172,32 @@ export const topicDetailService = {
 
   updateTopicDetail: async (detailData) => {
     try {
+      // Create a copy of the data to avoid mutating the original
+      const processedData = { ...detailData };
+      
+      // Convert topicId to integer if it exists
+      if (processedData.topicId !== undefined) {
+        processedData.topicId = parseInt(processedData.topicId, 10);
+        
+        // Check if conversion was successful
+        if (isNaN(processedData.topicId)) {
+          throw new Error('Invalid topic ID provided - must be a valid integer');
+        }
+        
+        console.log("Sending updateDetailTopic with topicId:", processedData.topicId, "Type:", typeof processedData.topicId);
+      }
+      
+      // Convert the detail ID to integer if needed
+      if (processedData.id !== undefined) {
+        const detailId = parseInt(processedData.id, 10);
+        if (!isNaN(detailId)) {
+          processedData.id = detailId;
+        }
+      }
+      
       const { data } = await apolloClient.mutate({
         mutation: UPDATE_TOPIC_DETAIL,
-        variables: { updateDetailTopicInput: detailData }
+        variables: { updateDetailTopicInput: processedData }
       });
       return data.updateDetailTopic;
     } catch (error) {
@@ -173,9 +208,20 @@ export const topicDetailService = {
 
   deleteTopicDetail: async (id) => {
     try {
+      // Format the ID according to the GraphQL API's expectations
+      // First convert to string to handle any object IDs, then try parsing as integer
+      // if that fails, use the string version
+      const idValue = String(id);
+      const parsedId = parseInt(idValue, 10);
+      
+      // Use either the integer (if valid) or the string ID
+      const formattedId = !isNaN(parsedId) ? parsedId : idValue;
+      
+      console.log(`Sending removeDetailTopic with id:`, formattedId, `Type:`, typeof formattedId);
+      
       const { data } = await apolloClient.mutate({
         mutation: DELETE_TOPIC_DETAIL,
-        variables: { id }
+        variables: { id: formattedId }
       });
       return data.removeDetailTopic;
     } catch (error) {

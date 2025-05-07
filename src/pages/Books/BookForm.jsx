@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft, FaSave, FaImage } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaImage, FaBook, FaUser, FaTags, FaLayerGroup, FaFileAlt } from 'react-icons/fa';
 import { bookService } from '../../services/bookService';
 import { topicDetailService } from '../../services/topicDetailService';
 import { topicService } from '../../services/topicService';
@@ -331,55 +331,82 @@ export const BookForm = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="p-6 flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-greenlove"></div>
+      <div className="p-6 flex justify-center items-center min-h-[60vh] bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-greenlove"></div>
+        <span className="ml-4 text-lg font-medium text-gray-700">Loading book data...</span>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Navigation */}
       <div className="mb-6">
         <Link 
           to="/books" 
-          className="inline-flex items-center text-greenlove hover:underline"
+          className="inline-flex items-center px-4 py-2 bg-white text-greenlove hover:text-greenlove_1 border border-gray-200 rounded-lg shadow-sm hover:shadow transition-all duration-200"
         >
           <FaArrowLeft className="mr-2" /> Back to Books
         </Link>
       </div>
       
       {/* Page title */}
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+        <FaBook className="mr-3 text-greenlove" />
         {isEditMode ? 'Edit Book' : 'Add New Book'}
       </h1>
 
       {/* Error message */}
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
-          {error}
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow mb-8 flex items-start">
+          <div className="mr-2 flex-shrink-0 mt-0.5">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium">Error</p>
+            <p>{error}</p>
+          </div>
         </div>
       )}
 
       {/* Success message */}
       {success && (
-        <div className="bg-green-50 text-green-600 p-4 rounded-md mb-6">
-          {success}
+        <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow mb-8 flex items-start">
+          <div className="mr-2 flex-shrink-0 mt-0.5">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium">Success</p>
+            <p>{success}</p>
+          </div>
         </div>
       )}
 
       {/* Book form */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <div className="bg-gradient-to-r from-greenlove to-green-600 py-4 px-6 text-white">
+          <h2 className="text-xl font-semibold">
+            {isEditMode ? 'Book Information' : 'New Book Details'}
+          </h2>
+          <p className="text-green-100 text-sm mt-1">
+            {isEditMode ? 'Update the information below' : 'Fill in the information below to add a new book'}
+          </p>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Left column - Book cover */}
             <div className="md:col-span-1">
               <div className="flex flex-col items-center">
-                <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-4">
+                <div className="relative w-full aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center mb-4 border-2 border-dashed border-gray-200">
                   {imageCompressing ? (
                     <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-greenlove mx-auto mb-2"></div>
-                      <p className="text-gray-500">Optimizing image...</p>
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-greenlove mx-auto mb-3"></div>
+                      <p className="text-gray-500 font-medium">Optimizing image...</p>
                     </div>
                   ) : imagePreview ? (
                     <img 
@@ -388,16 +415,19 @@ export const BookForm = () => {
                       className="max-h-full max-w-full object-contain" 
                     />
                   ) : (
-                    <div className="text-gray-400 text-center p-4">
-                      <FaImage className="mx-auto h-12 w-12 mb-2" />
-                      <p>No image</p>
+                    <div className="text-gray-400 text-center p-6">
+                      <FaImage className="mx-auto h-16 w-16 mb-3 text-gray-300" />
+                      <p className="font-medium">No cover image yet</p>
+                      <p className="text-xs text-gray-500 mt-1">Upload a cover to enhance your book listing</p>
                     </div>
                   )}
                 </div>
 
-                <label className="w-full flex flex-col items-center px-4 py-2 bg-greenlove text-white rounded-lg shadow-md tracking-wide cursor-pointer hover:bg-greenlove_1 transition-colors">
-                  <FaImage className="mr-2" />
-                  <span className="mt-2 text-sm">Select Cover Image</span>
+                <label className="w-full flex flex-col items-center px-4 py-3 bg-greenlove hover:bg-greenlove_1 text-white rounded-lg shadow-md tracking-wide cursor-pointer transition-all duration-200 hover:shadow-lg">
+                  <div className="flex items-center">
+                    <FaImage className="mr-2" />
+                    <span className="text-base font-medium">Select Cover Image</span>
+                  </div>
                   <input 
                     type="file" 
                     className="hidden" 
@@ -406,8 +436,8 @@ export const BookForm = () => {
                     disabled={imageCompressing}
                   />
                 </label>
-                <p className="text-xs text-gray-500 mt-2">
-                  Max file size: 5MB. Images will be automatically optimized.
+                <p className="text-xs text-gray-500 mt-3 text-center">
+                  Max file size: 5MB. Images will be automatically optimized for best performance.
                 </p>
               </div>
             </div>
@@ -416,23 +446,26 @@ export const BookForm = () => {
             <div className="md:col-span-2">
               <div className="grid grid-cols-1 gap-6">
                 {/* Book title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Book Title <span className="text-red-500">*</span>
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <FaBook className="mr-2 text-greenlove" />
+                    Book Title <span className="text-red-500 ml-1">*</span>
                   </label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove sm:text-sm"
+                    placeholder="Enter book title"
+                    className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-greenlove focus:border-greenlove text-base transition-colors duration-200"
                     required
                   />
                 </div>
 
                 {/* Book author */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <FaUser className="mr-2 text-greenlove" />
                     Author
                   </label>
                   <input
@@ -440,66 +473,76 @@ export const BookForm = () => {
                     name="author"
                     value={formData.author}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove sm:text-sm"
+                    placeholder="Enter author name"
+                    className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-greenlove focus:border-greenlove text-base transition-colors duration-200"
                   />
                 </div>
 
-                {/* Topic selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Main Category
-                  </label>
-                  <select
-                    value={selectedTopic}
-                    onChange={handleTopicChange}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove sm:text-sm"
-                  >
-                    <option value="">Select a category</option>
-                    {topics.map(topic => (
-                      <option key={topic.id} value={topic.id}>
-                        {topic.topicName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Topic selection */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <FaTags className="mr-2 text-greenlove" />
+                      Main Category
+                    </label>
+                    <select
+                      value={selectedTopic}
+                      onChange={handleTopicChange}
+                      className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-greenlove focus:border-greenlove text-base transition-colors duration-200 bg-white"
+                    >
+                      <option value="">Select a category</option>
+                      {topics.map(topic => (
+                        <option key={topic.id} value={topic.id}>
+                          {topic.topicName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                {/* Topic detail selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sub-category
-                  </label>
-                  <select
-                    name="topicDetailId"
-                    value={formData.topicDetailId}
-                    onChange={handleChange}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove sm:text-sm"
-                    disabled={!selectedTopic || topicDetails.length === 0}
-                  >
-                    <option value="">Select a sub-category</option>
-                    {topicDetails.map(detail => (
-                      <option key={detail.id} value={detail.id}>
-                        {detail.name}
-                      </option>
-                    ))}
-                  </select>
-                  {selectedTopic && topicDetails.length === 0 && (
-                    <p className="mt-1 text-sm text-red-500">
-                      No sub-categories available for this category.
-                    </p>
-                  )}
+                  {/* Topic detail selection */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <FaLayerGroup className="mr-2 text-greenlove" />
+                      Sub-category
+                    </label>
+                    <select
+                      name="topicDetailId"
+                      value={formData.topicDetailId}
+                      onChange={handleChange}
+                      className={`block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-greenlove focus:border-greenlove text-base transition-colors duration-200 bg-white ${!selectedTopic || topicDetails.length === 0 ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                      disabled={!selectedTopic || topicDetails.length === 0}
+                    >
+                      <option value="">Select a sub-category</option>
+                      {topicDetails.map(detail => (
+                        <option key={detail.id} value={detail.id}>
+                          {detail.name}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedTopic && topicDetails.length === 0 && (
+                      <p className="mt-2 text-sm text-amber-600 flex items-center">
+                        <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        No sub-categories available
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Book description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <FaFileAlt className="mr-2 text-greenlove" />
                     Description
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    rows={5}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove sm:text-sm"
+                    placeholder="Enter book description"
+                    rows={6}
+                    className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-greenlove focus:border-greenlove text-base transition-colors duration-200 resize-none"
                   />
                 </div>
               </div>
@@ -507,23 +550,23 @@ export const BookForm = () => {
           </div>
 
           {/* Form actions */}
-          <div className="mt-8 flex justify-end">
+          <div className="mt-10 pt-6 border-t border-gray-200 flex justify-end space-x-4">
             <Link
               to="/books"
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mr-3"
+              className="px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={saving || imageCompressing}
-              className={`inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-greenlove hover:bg-greenlove_1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-greenlove ${
-                (saving || imageCompressing) ? 'opacity-50 cursor-not-allowed' : ''
+              className={`inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-greenlove hover:bg-greenlove_1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-greenlove transition-all duration-200 ${
+                (saving || imageCompressing) ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'
               }`}
             >
               {saving ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

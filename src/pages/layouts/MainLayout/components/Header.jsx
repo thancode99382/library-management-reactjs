@@ -60,7 +60,7 @@ const Header = ({ toggleSidebar, sidebarOpen, isMobile }) => {
             </button>
             
             {/* Search */}
-            <div className="relative ml-4 lg:ml-0">
+            {/* <div className="relative ml-4 lg:ml-0">
               <div className="flex items-center bg-gray-100 rounded-md px-3 py-2 max-w-xs">
                 <FaSearch className="h-4 w-4 text-gray-400" />
                 <input
@@ -69,72 +69,12 @@ const Header = ({ toggleSidebar, sidebarOpen, isMobile }) => {
                   placeholder="Search..."
                 />
               </div>
-            </div>
+            </div> */}
           </div>
           
           <div className="flex items-center space-x-3">
-            {/* Notifications */}
-            <div className="relative">
-              <button
-                onClick={toggleNotifications}
-                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 focus:outline-none"
-              >
-                <span className="sr-only">Notifications</span>
-                <div className="relative">
-                  <FaBell size={20} />
-                  {unreadNotificationsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                      {unreadNotificationsCount}
-                    </span>
-                  )}
-                </div>
-              </button>
-
-              {/* Notifications panel */}
-              {showNotifications && (
-                <div className="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div className="py-2 px-3 border-b border-gray-100">
-                    <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-                  </div>
-                  <div className="max-h-60 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="text-center text-gray-500 py-4 text-sm">No notifications</p>
-                    ) : (
-                      <div className="py-1">
-                        {notifications.map((notification) => (
-                          <a
-                            key={notification.id}
-                            href="#"
-                            className={`flex px-4 py-2 text-sm hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}
-                          >
-                            <div className="flex-shrink-0 mr-3">
-                              <div className={`h-8 w-8 rounded-full flex items-center justify-center ${!notification.read ? 'bg-greenlove text-white' : 'bg-gray-200'}`}>
-                                <FaBell size={12} />
-                              </div>
-                            </div>
-                            <div className="w-full">
-                              <p className={`text-sm ${!notification.read ? 'font-medium' : 'text-gray-600'}`}>{notification.message}</p>
-                              <p className="text-xs text-gray-400">{notification.time}</p>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="py-1 border-t border-gray-100">
-                    <a href="#" className="block px-4 py-2 text-sm text-center text-greenlove hover:bg-gray-50">
-                      View all notifications
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Settings */}
-            <button className="p-1 rounded-full text-gray-500 hover:bg-gray-100 focus:outline-none">
-              <span className="sr-only">Settings</span>
-              <FiSettings size={20} />
-            </button>
+            
+            
 
             {/* User dropdown */}
             <div className="relative">

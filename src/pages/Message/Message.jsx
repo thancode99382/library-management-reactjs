@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ConversationList } from './components/ConversationList';
 import { ChatArea } from './components/ChatArea';
 import { UserDetails } from './components/UserDetails';
 
@@ -14,7 +15,7 @@ export const Message = () => {
       {
         id: 1,
         name: 'Datkes AI',
-        avatar: 'https://i.pinimg.com/736x/b9/c5/34/b9c5344544ba5f44997f4190dfdf273d.jpg',
+        avatar: 'https://i.pinimg.com/736x/9a/d3/b6/9ad3b6ba79c242f7ce03120d1dc05893.jpg',
         lastMessage: 'Hey, have you checked the new book arrivals?',
         time: '10:30 AM',
         unread: 2,
@@ -29,6 +30,7 @@ export const Message = () => {
           { id: 7, text: 'Hey, have you checked the new book arrivals?', sent: false, time: '10:30 AM' },
         ]
       },
+      
     ];
     
     setConversations(mockConversations);
@@ -61,11 +63,12 @@ export const Message = () => {
     ));
     
     setMessage('');
-    setActiveConversation(mockConversations[0]);
   };
 
   return (
-    <div className="flex h-[calc(100vh-9rem)] rounded-lg overflow-hidden">      
+    <div className="flex h-[calc(100vh-9rem)] rounded-lg overflow-hidden  ">
+      
+      
       <ChatArea 
         activeConversation={activeConversation}
         message={message}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaBook, FaUser, FaCalendarAlt } from 'react-icons/fa';
 
 const BookCard = ({ book, onDelete }) => {
   // Function to format date
@@ -19,54 +19,92 @@ const BookCard = ({ book, onDelete }) => {
     : 'https://via.placeholder.com/150x200?text=No+Cover';
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <div className="relative group">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
+      <div className="relative group h-64">
+        {/* Book cover image with gradient overlay for better title visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
         {/* Book cover image */}
         <img 
           src={bookCoverUrl} 
           alt={book.title} 
-          className="w-full h-48 object-cover"
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://via.placeholder.com/150x200?text=No+Cover';
+          }}
         />
         
-        {/* Hover overlay with actions */}
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 flex items-center justify-center gap-4 transition-all duration-300 opacity-0 group-hover:opacity-100">
-          <Link to={`/books/${book.id}`} className="text-white bg-greenlove p-2 rounded-full hover:bg-greenlove_1">
-            <FaEye size={16} />
-          </Link>
-          <Link to={`/books/${book.id}/edit`} className="text-white bg-blue-500 p-2 rounded-full hover:bg-blue-600">
-            <FaEdit size={16} />
-          </Link>
-          <button 
-            onClick={() => onDelete(book.id)} 
-            className="text-white bg-red-500 p-2 rounded-full hover:bg-red-600"
-          >
-            <FaTrash size={16} />
-          </button>
+        {/* Category tag - shown always */}
+        {book.detailTopic && (
+          <div className="absolute top-3 right-3 z-20">
+            <span className="px-2 py-1 bg-greenlove/90 text-xs font-medium rounded-lg text-white shadow-sm">
+              {book.detailTopic.name}
+            </span>
+          </div>
+        )}
+        
+        {/* Hover overlay with actions - ENHANCED */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 flex items-center justify-center">
+          <div className="flex gap-4 items-center">
+            <Link 
+              to={`/books/${book.id}`} 
+              className="text-white bg-greenlove hover:bg-greenlove_1 p-3.5 rounded-full shadow-lg transition-all duration-200 transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 delay-75" 
+              title="View details"
+            >
+              <FaEye size={18} className="transform group-hover:scale-110 transition-transform" />
+            </Link>
+            <Link 
+              to={`/books/${book.id}/edit`} 
+              className="text-white bg-blue-500 hover:bg-blue-600 p-3.5 rounded-full shadow-lg transition-all duration-200 transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 delay-100"
+              title="Edit book"
+            >
+              <FaEdit size={18} className="transform group-hover:scale-110 transition-transform" />
+            </Link>
+            <button 
+              onClick={() => onDelete(book.id)} 
+              className="text-white bg-red-500 hover:bg-red-600 p-3.5 rounded-full shadow-lg transition-all duration-200 transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 delay-150"
+              title="Delete book"
+            >
+              <FaTrash size={18} className="transform group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="p-4">
-        <h3 className="font-bold text-lg text-gray-800 truncate">{book.title}</h3>
-        <p className="text-gray-600 text-sm">{book.author || 'Unknown author'}</p>
+      <div className="p-4 flex-grow flex flex-col">
+        <h3 className="font-bold text-lg text-gray-800 line-clamp-1 hover:text-greenlove transition-colors duration-200">
+          <Link to={`/books/${book.id}`} className="hover:underline">
+            {book.title}
+          </Link>
+        </h3>
         
-        {/* Book category/topic */}
-        {book.detailTopic && (
+        {/* Author with icon */}
+        <div className="flex items-center mt-2 text-gray-600">
+          <FaUser size={12} className="mr-2 text-greenlove/70" />
+          <p className="text-sm font-medium">{book.author || 'Unknown author'}</p>
+        </div>
+        
+        {/* Topic path - full hierarchy */}
+        {book.detailTopic && book.detailTopic.topic && (
           <div className="mt-2 flex items-center">
-            <span className="px-2 py-1 bg-gray-100 text-xs rounded-full text-gray-600">
-              {book.detailTopic.topic?.topicName} &gt; {book.detailTopic.name}
+            <FaBook size={12} className="mr-2 text-greenlove/70" />
+            <span className="text-xs text-gray-500">
+              {book.detailTopic.topic.topicName} &gt; {book.detailTopic.name}
             </span>
           </div>
         )}
         
         {/* Description preview */}
-        <p className="mt-2 text-gray-500 text-sm line-clamp-2">
+        <p className="mt-3 text-gray-600 text-sm line-clamp-2 flex-grow">
           {book.description || 'No description available.'}
         </p>
         
-        {/* Date added */}
-        <p className="mt-3 text-xs text-gray-400">
-          Added: {formatDate(book.createdAt)}
-        </p>
+        {/* Date added with icon */}
+        <div className="mt-4 pt-3 border-t border-gray-100 flex items-center text-xs text-gray-400">
+          <FaCalendarAlt size={12} className="mr-1" />
+          <span>{formatDate(book.createdAt)}</span>
+        </div>
       </div>
     </div>
   );

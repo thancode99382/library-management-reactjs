@@ -144,9 +144,24 @@ export const topicService = {
 
   updateTopic: async (topicData) => {
     try {
+      // Create a copy of the data to avoid mutating the original
+      const processedData = { ...topicData };
+      
+      // Convert id to integer if it exists
+      if (processedData.id !== undefined) {
+        processedData.id = parseInt(processedData.id, 10);
+        
+        // Check if conversion was successful
+        if (isNaN(processedData.id)) {
+          throw new Error('Invalid topic ID provided - must be a valid integer');
+        }
+        
+        console.log("Sending updateTopic with id:", processedData.id, "Type:", typeof processedData.id);
+      }
+      
       const { data } = await apolloClient.mutate({
         mutation: UPDATE_TOPIC,
-        variables: { updateTopicInput: topicData }
+        variables: { updateTopicInput: processedData }
       });
       return data.updateTopic;
     } catch (error) {

@@ -57,16 +57,16 @@ export const routerList = [
     href: ROUTES.Message,
     component: Message,
   },
-  {
-    title: "Wallet",
-    icon: <MdOutlineAccountBalanceWallet size={30} />,
-    href: ROUTES.Wallet,
-    component: Wallet,
-  },
-  {
-    title: "Setting",
-    icon: <MdOutlineSettings size={30} />,
-    href: ROUTES.Setting,
-    component: Setting,
-  },
+  // {
+  //   title: "Wallet",
+  //   icon: <MdOutlineAccountBalanceWallet size={30} />,
+  //   href: ROUTES.Wallet,
+  //   component: Wallet,
+  // },
+  // {
+  //   title: "Setting",
+  //   icon: <MdOutlineSettings size={30} />,
+  //   href: ROUTES.Setting,
+  //   component: Setting,
+  // },
 ];
