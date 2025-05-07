@@ -120,16 +120,28 @@ export const topicDetailService = {
   },
 
   getTopicDetailsByTopicId: async (topicId) => {
+
+
+   
     try {
+      if (!topicId) {
+        console.error('Invalid topicId provided:', topicId);
+        return [];
+      }
+      
+      // Always convert topicId to string to ensure consistent type for GraphQL ID
+      const formattedTopicId = String(topicId);
+      
       const { data } = await apolloClient.query({
         query: GET_TOPIC_DETAILS_BY_TOPIC_ID,
-        variables: { topicId },
+        variables: { topicId: formattedTopicId },
         fetchPolicy: 'network-only'
       });
-      return data.detailTopicsByTopicId;
+      return data.detailTopicsByTopicId || [];
     } catch (error) {
       console.error(`Error fetching topic details for topic ID ${topicId}:`, error);
-      throw error;
+      // Return empty array instead of throwing to prevent UI breakage
+      return [];
     }
   },
 

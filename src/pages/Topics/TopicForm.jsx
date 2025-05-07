@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft, FaSave } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 import { topicService } from '../../services/topicService';
+import { topicDetailService } from '../../services/topicDetailService';
 
 export const TopicForm = () => {
   const { id } = useParams(); // If id exists, we're editing a topic
@@ -10,6 +11,10 @@ export const TopicForm = () => {
 
   // Form state
   const [topicName, setTopicName] = useState('');
+  const [detailTopics, setDetailTopics] = useState([]);
+  const [newDetailName, setNewDetailName] = useState('');
+  const [editingDetailId, setEditingDetailId] = useState(null);
+  const [editingDetailName, setEditingDetailName] = useState('');
   const [loading, setLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -24,6 +29,11 @@ export const TopicForm = () => {
         setLoading(true);
         const topicData = await topicService.getTopicById(id);
         setTopicName(topicData.topicName || '');
+        
+        // Set detail topics from the topic query response
+        if (topicData.detailTopics) {
+          setDetailTopics(topicData.detailTopics);
+        }
       } catch (err) {
         console.error('Error loading topic:', err);
         setError('Failed to load topic data. Please try again.');
@@ -69,6 +79,109 @@ export const TopicForm = () => {
     }
   };
 
+  // Add a new detail topic
+  const handleAddDetail = async () => {
+    if (!newDetailName.trim()) {
+      setError('Sub-category name is required');
+      return;
+    }
+
+    try {
+      setError(null);
+      setSaving(true);
+      
+      const response = await topicDetailService.createTopicDetail({
+        name: newDetailName,
+        topicId: id
+      });
+      
+      // Add the new detail to the list
+      setDetailTopics([...detailTopics, response]);
+      setNewDetailName('');
+      setSuccess('Sub-category added successfully!');
+      
+      // Clear success message after a delay
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error adding topic detail:', err);
+      setError('Failed to add sub-category. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Update a detail topic
+  const handleUpdateDetail = async () => {
+    if (!editingDetailName.trim() || !editingDetailId) {
+      setError('Sub-category name is required');
+      return;
+    }
+
+    try {
+      setError(null);
+      setSaving(true);
+      
+      await topicDetailService.updateTopicDetail({
+        id: editingDetailId,
+        name: editingDetailName
+      });
+      
+      // Update the detail in the list
+      const updatedDetails = detailTopics.map(detail => 
+        detail.id === editingDetailId 
+          ? { ...detail, name: editingDetailName } 
+          : detail
+      );
+      
+      setDetailTopics(updatedDetails);
+      setEditingDetailId(null);
+      setEditingDetailName('');
+      setSuccess('Sub-category updated successfully!');
+      
+      // Clear success message after a delay
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error updating topic detail:', err);
+      setError('Failed to update sub-category. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete a detail topic
+  const handleDeleteDetail = async (detailId) => {
+    try {
+      setError(null);
+      setSaving(true);
+      
+      await topicDetailService.deleteTopicDetail(detailId);
+      
+      // Remove the detail from the list
+      setDetailTopics(detailTopics.filter(detail => detail.id !== detailId));
+      setSuccess('Sub-category deleted successfully!');
+      
+      // Clear success message after a delay
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error deleting topic detail:', err);
+      setError('Failed to delete sub-category. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Start editing a detail topic
+  const startEditingDetail = (detail) => {
+    setEditingDetailId(detail.id);
+    setEditingDetailName(detail.name);
+  };
+
+  // Cancel editing a detail topic
+  const cancelEditingDetail = () => {
+    setEditingDetailId(null);
+    setEditingDetailName('');
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -110,7 +223,7 @@ export const TopicForm = () => {
       )}
 
       {/* Topic form */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <form onSubmit={handleSubmit} className="p-6">
           <div className="mb-6">
             <label htmlFor="topicName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -158,6 +271,92 @@ export const TopicForm = () => {
           </div>
         </form>
       </div>
+
+      {/* Detail Topics section - only show in edit mode */}
+      {isEditMode && (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Sub-Categories</h2>
+            
+            {/* Add new detail topic form */}
+            <div className="mb-6 flex">
+              <input
+                type="text"
+                value={newDetailName}
+                onChange={(e) => setNewDetailName(e.target.value)}
+                className="block flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove"
+                placeholder="Enter sub-category name"
+              />
+              <button
+                type="button"
+                onClick={handleAddDetail}
+                disabled={saving || !newDetailName.trim()}
+                className="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-r-md shadow-sm text-sm font-medium text-white bg-greenlove hover:bg-greenlove_1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-greenlove disabled:opacity-50"
+              >
+                <FaPlus className="mr-2" /> Add
+              </button>
+            </div>
+            
+            {/* List of detail topics */}
+            <div className="space-y-4">
+              {detailTopics.length > 0 ? (
+                detailTopics.map(detail => (
+                  <div key={detail.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    {editingDetailId === detail.id ? (
+                      <div className="flex-1 flex">
+                        <input
+                          type="text"
+                          value={editingDetailName}
+                          onChange={(e) => setEditingDetailName(e.target.value)}
+                          className="block flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-greenlove focus:border-greenlove"
+                          placeholder="Enter sub-category name"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleUpdateDetail}
+                          disabled={saving || !editingDetailName.trim()}
+                          className="px-2 py-1 bg-greenlove text-white rounded-tr-md hover:bg-greenlove_1"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEditingDetail}
+                          className="px-2 py-1 bg-gray-500 text-white rounded-br-md hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-gray-800">{detail.name}</span>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => startEditingDetail(detail)}
+                            className="text-blue-600 hover:text-blue-800 p-1 mr-1"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDetail(detail.id)}
+                            className="text-red-600 hover:text-red-800 p-1"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 italic">No sub-categories added yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

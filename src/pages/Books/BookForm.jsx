@@ -32,6 +32,7 @@ export const BookForm = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imageCompressing, setImageCompressing] = useState(false);
 
+
   // Fetch data when component mounts
   useEffect(() => {
     const fetchData = async () => {
@@ -86,16 +87,29 @@ export const BookForm = () => {
     const loadTopicDetails = async () => {
       if (selectedTopic) {
         try {
-          const data = await topicDetailService.getTopicDetailsByTopicId(selectedTopic);
-          setTopicDetails(data);
+          setTopicDetails([]); // Clear previous topic details while loading
+          const topicData = await topicService.getTopicById(selectedTopic);
           
-          // Clear selected topic detail if it doesn't belong to the selected topic
-          const currentDetailExists = data.some(detail => detail.id === formData.topicDetailId);
-          if (!currentDetailExists) {
+          if (topicData && topicData.detailTopics && topicData.detailTopics.length > 0) {
+            setTopicDetails(topicData.detailTopics);
+            
+            // Clear selected topic detail if it doesn't belong to the selected topic
+            const currentDetailExists = topicData.detailTopics.some(detail => detail.id === formData.topicDetailId);
+            if (!currentDetailExists) {
+              setFormData(prev => ({ ...prev, topicDetailId: '' }));
+            }
+          } else {
+            console.log('No topic details found for this category');
+            setTopicDetails([]);
+            // Reset the topic detail selection since there are no options
             setFormData(prev => ({ ...prev, topicDetailId: '' }));
           }
         } catch (err) {
           console.error('Error loading topic details:', err);
+          setError(`Failed to load sub-categories. Please try selecting the category again.`);
+          setTopicDetails([]);
+          // Reset the topic detail selection since there was an error
+          setFormData(prev => ({ ...prev, topicDetailId: '' }));
         }
       } else {
         setTopicDetails([]);
@@ -118,7 +132,7 @@ export const BookForm = () => {
   };
 
   // Function to compress and resize image
-  const compressImage = (file, maxWidth = 800, maxHeight = 1200, quality = 0.7) => {
+  const compressImage = (file, maxWidth = 400, maxHeight = 600, quality = 0.3) => {
     return new Promise((resolve, reject) => {
       setImageCompressing(true);
       
@@ -150,14 +164,54 @@ export const BookForm = () => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
+        // Adaptive quality based on file size
+        let adaptiveQuality = quality;
+        if (file.size > 3 * 1024 * 1024) { // If original is over 3MB
+          adaptiveQuality = 0.2; // Use very low quality for large images
+        } else if (file.size > 1 * 1024 * 1024) { // If original is over 1MB
+          adaptiveQuality = 0.25; // Use low quality
+        }
+        
         // Convert to blob and return
         canvas.toBlob(
           (blob) => {
-            setImageCompressing(false);
-            resolve(blob);
+            // Check if blob is still too large and compress again if needed
+            if (blob.size > 500 * 1024) { // If still over 500KB
+              const reader = new FileReader();
+              reader.onload = () => {
+                const img2 = new Image();
+                img2.onload = () => {
+                  // Further reduce dimensions by 20%
+                  const width2 = Math.round(width * 0.8);
+                  const height2 = Math.round(height * 0.8);
+                  
+                  const canvas2 = document.createElement('canvas');
+                  canvas2.width = width2;
+                  canvas2.height = height2;
+                  
+                  const ctx2 = canvas2.getContext('2d');
+                  ctx2.drawImage(img2, 0, 0, width2, height2);
+                  
+                  // Use even lower quality
+                  canvas2.toBlob(
+                    (finalBlob) => {
+                      setImageCompressing(false);
+                      resolve(finalBlob);
+                    },
+                    file.type,
+                    Math.max(adaptiveQuality - 0.1, 0.15) // Even lower quality, but not less than 0.15
+                  );
+                };
+                img2.src = reader.result;
+              };
+              reader.readAsDataURL(blob);
+            } else {
+              setImageCompressing(false);
+              resolve(blob);
+            }
           },
           file.type,
-          quality
+          adaptiveQuality
         );
       };
       

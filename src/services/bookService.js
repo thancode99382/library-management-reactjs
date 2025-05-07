@@ -32,7 +32,7 @@ export const GET_BOOKS = gql`
 `;
 
 export const GET_BOOK_BY_ID = gql`
-  query Book($id: ID!) {
+  query Book($id: Int!) {
     book(id: $id) {
       author
       bookCover
@@ -86,7 +86,7 @@ export const UPDATE_BOOK = gql`
 `;
 
 export const DELETE_BOOK = gql`
-  mutation RemoveBook($id: ID!) {
+  mutation RemoveBook($id: Int!) {
     removeBook(id: $id) {
       author
       bookCover
@@ -102,6 +102,23 @@ export const DELETE_BOOK = gql`
 
 // Service functions
 export const bookService = {
+  getBookId: (id) => {
+    // Check if id exists
+    if (id === undefined || id === null) {
+      throw new Error('Book ID is required');
+    }
+    
+    // Convert the id to an integer
+    const bookId = parseInt(id, 10);
+    
+    // Check if id is valid
+    if (isNaN(bookId)) {
+      throw new Error('Invalid book ID provided - must be a valid integer');
+    }
+    
+    return bookId;
+  },
+
   getBooks: async () => {
     try {
       const { data } = await apolloClient.query({
@@ -117,10 +134,13 @@ export const bookService = {
 
   getBookById: async (id) => {
     try {
+      // Use the getBookId function to validate and convert the ID
+      const bookId = bookService.getBookId(id);
+      
       const { data } = await apolloClient.query({
         query: GET_BOOK_BY_ID,
-        variables: { id },
-        fetchPolicy: 'network-only'
+        variables: { id: bookId },
+        fetchPolicy: 'no-cache'
       });
       return data.book;
     } catch (error) {
@@ -133,7 +153,7 @@ export const bookService = {
     try {
       // Create a copy of the data to avoid mutation
       const processedData = { ...bookData };
-      
+     
       // Ensure topicDetailId is an integer or remove it if empty/null
       if (processedData.topicDetailId === '' || processedData.topicDetailId === null) {
         delete processedData.topicDetailId; // Remove the property entirely
@@ -160,6 +180,14 @@ export const bookService = {
       // Create a copy of the data to avoid mutation
       const processedData = { ...bookData };
       
+      // Ensure id is an integer
+      if (processedData.id) {
+        processedData.id = parseInt(processedData.id, 10);
+        if (isNaN(processedData.id)) {
+          throw new Error("Book ID must be a valid number");
+        }
+      }
+     
       // Ensure topicDetailId is an integer or remove it if empty/null
       if (processedData.topicDetailId === '' || processedData.topicDetailId === null) {
         delete processedData.topicDetailId; // Remove the property entirely
@@ -183,9 +211,13 @@ export const bookService = {
 
   deleteBook: async (id) => {
     try {
+      // Use the getBookId function to validate and convert the ID
+      const bookId = bookService.getBookId(id);
+      
       const { data } = await apolloClient.mutate({
         mutation: DELETE_BOOK,
-        variables: { id }
+        variables: { id: bookId },
+        fetchPolicy: 'no-cache' 
       });
       return data.removeBook;
     } catch (error) {
