@@ -13,12 +13,12 @@ import {
  Wallet,
  Dashboard,
  Setting,
- Transaction
+ Message
 } from "../pages/index"
 
 export const ROUTES = {
   Dashboard: "/",
-  Transaction: "/transaction",
+  Message: "/message",
   Analytic: "/analytic",
   Wallet: "/wallet",
   Setting: "/setting",
@@ -52,10 +52,10 @@ export const routerList = [
     href: ROUTES.Topics,
   },
   {
-    title: "Transaction",
+    title: "Message",
     icon: <GrTransaction size={30} />,
-    href: ROUTES.Transaction,
-    component: Transaction,
+    href: ROUTES.Message,
+    component: Message,
   },
   {
     title: "Wallet",
